@@ -1,0 +1,186 @@
+<!-- File Path: /public/login.html -->
+<!-- Purpose: Login / Register page for customers and admin -->
+<!-- Linked Files: css/style.css, js/auth.js -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login – Adult Clothing Store</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=sn-pro@400,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-container">
+      <a href="/" class="logo" aria-label="AS Cart Services home">
+        <img src="/css/logo.png" alt="AS Cart Services">
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="auth-container">
+      <!-- ========== LOGIN FORM ========== -->
+      <div id="loginBox">
+        <h2>Sign In</h2>
+        <div id="loginError" class="error-message"></div>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" name="email" required>
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" name="password" required>
+          </div>
+          <button type="submit" class="btn-primary auth-submit">Login</button>
+        </form>
+        <p class="auth-toggle">
+          Don't have an account? <a id="showRegisterLink">Create one</a>
+        </p>
+      </div>
+
+      <!-- ========== REGISTER FORM ========== -->
+      <div id="registerBox" class="hidden">
+        <h2>Create Account</h2>
+        <div id="registerError" class="error-message"></div>
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="regFirstName">First Name *</label>
+            <input type="text" id="regFirstName" name="firstName" required>
+          </div>
+          <div class="form-group">
+            <label for="regLastName">Last Name *</label>
+            <input type="text" id="regLastName" name="lastName" required>
+          </div>
+          <div class="form-group">
+            <label for="regEmail">Email *</label>
+            <input type="email" id="regEmail" name="email" required>
+          </div>
+          <div class="form-group">
+            <label for="regPassword">Password *</label>
+            <input type="password" id="regPassword" name="password" required minlength="6">
+          </div>
+          <div class="form-group">
+            <label for="regPhone">Phone (optional)</label>
+            <input type="text" id="regPhone" name="phone">
+          </div>
+          <button type="submit" class="btn-primary auth-submit">Register</button>
+        </form>
+        <p class="auth-toggle">
+          Already have an account? <a id="showLoginLink">Sign In</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <p>&copy; 2026 Adult Clothing Store. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // ---------- Toggle between login and register ----------
+    const loginBox = document.getElementById('loginBox');
+    const registerBox = document.getElementById('registerBox');
+    const showRegister = document.getElementById('showRegisterLink');
+    const showLogin = document.getElementById('showLoginLink');
+
+    function toggleAuth(showLoginForm) {
+      if (showLoginForm) {
+        loginBox.classList.remove('hidden');
+        registerBox.classList.add('hidden');
+      } else {
+        loginBox.classList.add('hidden');
+        registerBox.classList.remove('hidden');
+      }
+      // Clear any previous errors
+      document.getElementById('loginError').style.display = 'none';
+      document.getElementById('registerError').style.display = 'none';
+    }
+
+    showRegister.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleAuth(false);
+    });
+
+    showLogin.addEventListener('click', (e) => {
+      e.preventDefault();
+      toggleAuth(true);
+    });
+
+    // ---------- Login handler ----------
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+      errorEl.style.display = 'none';
+      errorEl.textContent = '';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Login failed');
+        }
+
+        saveToken(data.token);
+        saveUser(data.user);
+        // Redirect based on role
+        if (data.user.role === 'ADMIN') {
+          window.location.href = '/admin';
+        } else {
+          window.location.href = '/';
+        }
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      }
+    });
+
+    // ---------- Register handler ----------
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const firstName = document.getElementById('regFirstName').value;
+      const lastName = document.getElementById('regLastName').value;
+      const email = document.getElementById('regEmail').value;
+      const password = document.getElementById('regPassword').value;
+      const phone = document.getElementById('regPhone').value || null;
+      const errorEl = document.getElementById('registerError');
+      errorEl.style.display = 'none';
+      errorEl.textContent = '';
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ firstName, lastName, email, password, phone })
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Registration failed');
+        }
+
+        saveToken(data.token);
+        saveUser(data.user);
+        // Always redirect to home after registration (role is CUSTOMER)
+        window.location.href = '/';
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

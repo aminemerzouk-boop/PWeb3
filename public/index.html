@@ -1,0 +1,90 @@
+<!-- File Path: /public/index.html -->
+<!-- Purpose: Homepage – sticky header with search & filter, mobile‑first -->
+<!-- Linked Files: css/style.css, js/auth.js, js/header.js, js/cart.js, js/main.js -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adult Clothing Store</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=sn-pro@400,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/cart.js" defer></script>
+  <script src="/js/auth.js" defer></script>
+  <script src="/js/header.js" defer></script>
+  <script src="/js/main.js" defer></script>
+</head>
+<body>
+  <!-- ========== STICKY HEADER ========== -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-container">
+      <!-- Logo (fixed) -->
+      <a href="/" class="logo" aria-label="AS Cart Services home">
+        <img src="/css/logo.png" alt="AS Cart Services">
+      </a>
+
+      <!-- Search & Filter tools (now inside the header) -->
+      <div class="header-tools">
+        <input type="text" id="searchInput" placeholder="Search products...">
+        <select id="categoryFilter">
+          <option value="">All Categories</option>
+          <!-- populated by JS -->
+        </select>
+      </div>
+
+      <!-- Hamburger button (mobile only) -->
+      <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">
+        <span class="hamburger"></span>
+      </button>
+
+      <!-- Navigation -->
+      <nav class="main-nav" id="mainNav">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/cart.html">Cart <span id="cartCount">0</span></a></li>
+          <li><a href="#footer" id="contactLink">Contact</a></li>
+          <li><a href="/login.html">Login</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container">
+        <h1>Discover Your Style</h1>
+        <p>Premium adult clothing for men and women. Fresh arrivals every week.</p>
+        <a href="#productsSection" class="btn-primary" id="shopNowButton">Shop Now</a>
+      </div>
+    </section>
+
+    <!-- Product listing (starting immediately after hero, no extra search section) -->
+    <section class="products-section" id="productsSection">
+      <div class="container">
+        <h2>Our Products</h2>
+        <div class="product-grid" id="productGrid">
+          <!-- Injected via JS -->
+        </div>
+        <p class="loading-message" id="loadingMessage">Loading products…</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="footer">
+    <div class="container footer-container">
+      <div class="footer-contact">
+        <h3>Contact Us</h3>
+        <p>Email: <a href="mailto:merzoukamine47@gmail.com">merzoukamine47@gmail.com</a>, <a href="mailto:samoumegharba210@gmail.com">samoumegharba210@gmail.com</a></p>
+        <p>Phone: <a href="tel:+2135558055580">0558 05 55 80</a>, <a href="tel:+213770222478">0770 22 24 78</a></p>
+        
+      </div>
+      <div class="footer-links">
+        <p><a href="/terms.html">Terms of Service</a></p>
+        <p>&copy; 2026 Adult Clothing Store. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

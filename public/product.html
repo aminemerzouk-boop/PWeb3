@@ -1,0 +1,98 @@
+<!-- File Path: /public/product.html -->
+<!-- Purpose: Product detail page -->
+<!-- Linked Files: css/style.css, js/cart.js -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details – Adult Clothing Store</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=sn-pro@400,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/cart.js" defer></script>
+  <script src="/js/auth.js" defer></script>
+  <script src="/js/header.js" defer></script>
+  <script defer>
+    // Inline script to keep it self-contained (or could be a separate file)
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get('id');
+    if (!productId) {
+      document.getElementById('productDetails').innerHTML = '<p>No product specified.</p>';
+    } else {
+      loadProduct(productId);
+    }
+
+    async function loadProduct(id) {
+      try {
+        const res = await fetch(`/api/products/${id}`);
+        if (!res.ok) throw new Error('Product not found');
+        const product = await res.json();
+        renderProductDetails(product);
+      } catch (err) {
+        document.getElementById('productDetails').innerHTML = '<p>Product not found.</p>';
+      }
+    }
+
+    function renderProductDetails(product) {
+      const container = document.getElementById('productDetails');
+      const imageUrl = (product.images && product.images.length > 0)
+        ? product.images[0]
+        : 'https://via.placeholder.com/600x400?text=No+Image';
+      container.innerHTML = `
+        <div class="product-detail">
+          <div class="product-detail__image">
+            <img src="${imageUrl}" alt="${product.name}">
+          </div>
+          <div class="product-detail__info">
+            <h1>${product.name}</h1>
+            <p class="product-detail__category">${product.categoryName}</p>
+            <p class="product-detail__price">DA ${parseFloat(product.price).toFixed(2)}</p>
+            <p class="product-detail__stock">${product.stock > 0 ? 'In Stock' : 'Out of Stock'}</p>
+            <p class="product-detail__description">${product.description}</p>
+            <button id="addToCartBtn" class="btn-primary" ${product.stock <= 0 ? 'disabled' : ''}>
+              Add to Cart
+            </button>
+            <a href="/cart.html" class="btn-secondary product-detail__secondary">View Cart</a>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('addToCartBtn').addEventListener('click', () => {
+        addToCart(product.id);
+        alert('Added to cart!');
+        updateCartCount();
+      });
+    }
+  </script>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container header-container">
+      <a href="/" class="logo" aria-label="AS Cart Services home">
+        <img src="/css/logo.png" alt="AS Cart Services">
+      </a>
+      <nav class="simple-nav">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/login.html">Login</a></li>
+          <li><a href="/cart.html">Cart <span id="cartCount">0</span></a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container page-main">
+    <div id="productDetails"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <p>&copy; 2026 Adult Clothing Store. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+
+</html>

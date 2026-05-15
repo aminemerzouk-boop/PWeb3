@@ -1,0 +1,118 @@
+<!-- File Path: /public/orders.html -->
+<!-- Purpose: Customer order tracking page -->
+<!-- Linked Files: css/style.css, js/auth.js, js/header.js -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders – Adult Clothing Store</title>
+    <link href="https://api.fontshare.com/v2/css?f[]=sn-pro@400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/auth.js" defer></script>
+    <script src="/js/auth.js" defer></script>
+    <script src="/js/header.js" defer></script>
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="container header-container">
+            <a href="/" class="logo" aria-label="AS Cart Services home">
+                <img src="/css/logo.png" alt="AS Cart Services">
+            </a>
+            <nav class="simple-nav">
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/cart.html">Cart <span id="cartCount">0</span></a></li>
+                    <li><a href="/login.html">Login</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="orders-container">
+        <h1>My Orders</h1>
+        <div id="ordersList">
+            <p class="loading-spinner">Loading orders…</p>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-container">
+            <p>&copy; 2026 Adult Clothing Store. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = getToken();
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const container = document.getElementById('ordersList');
+            try {
+                const res = await fetch('/api/orders/my', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Failed to load orders');
+
+                const orders = await res.json();
+                if (orders.length === 0) {
+                    container.innerHTML = '<div class="empty-orders">You have no orders yet. <a href="/">Start shopping</a></div>';
+                    return;
+                }
+
+                let html = '';
+                orders.forEach(order => {
+                    const date = new Date(order.createdAt).toLocaleDateString();
+                    const statusClass = `status-${order.status.toLowerCase()}`;
+                    const statusText = order.status;
+                    const itemsHtml = order.items.map(item => `
+            <div class="order-item">
+              <img src="${item.images?.[0] || 'https://via.placeholder.com/40'}" alt="${item.productName}">
+              <div class="item-info">
+                <strong>${item.productName}</strong><br>
+                Qty: ${item.quantity} | DA{parseFloat(item.price).toFixed(2)}
+              </div>
+            </div>
+          `).join('');
+
+                    html += `
+            <div class="order-card">
+              <div class="order-header">
+                <div>
+                  <span class="order-id">Order #${order.id.slice(0, 8)}…</span>
+                  <span class="order-date">${date}</span>
+                </div>
+                <span class="order-status ${statusClass}">${statusText}</span>
+              </div>
+              <div class="order-details">
+                <strong>Address:</strong> ${order.address} (${order.wilayaName})<br>
+                <strong>Total:</strong> DA ${parseFloat(order.totalAmount).toFixed(2)}
+              </div>
+              <div class="order-items">
+                ${itemsHtml}
+              </div>
+            </div>
+          `;
+                });
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = '<p>Error loading orders. Please try again later.</p>';
+                console.error(err);
+            }
+
+            // Update cart count if present
+            const cartCountEl = document.getElementById('cartCount');
+            if (cartCountEl) {
+                cartCountEl.textContent = getCartCount();
+            }
+        });
+    </script>
+</body>
+
+</html>

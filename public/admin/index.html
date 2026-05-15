@@ -1,0 +1,228 @@
+<!-- File Path: /public/admin/index.html -->
+<!-- Purpose: Admin Dashboard, Product Performance, Orders, Inventory, Product Management -->
+<!-- Linked Files: /css/style.css, /js/auth.js, /admin/js/admin.js, Chart.js CDN -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin – Adult Clothing Store</title>
+  <!-- SN Pro font -->
+  <link href="https://api.fontshare.com/v2/css?f[]=sn-pro@400,700&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+  <!-- Main stylesheet -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!-- Load auth.js first (defer ensures it runs in order) -->
+  <script src="/js/auth.js" defer></script>
+  <!-- Load admin.js from the admin folder, only ONCE, with defer -->
+  <script src="/admin/js/admin.js" defer></script>
+</head>
+
+<body>
+
+  <header class="site-header">
+    <div class="container header-container">
+      <a href="/" class="logo" aria-label="AS Cart Services home">
+        <img src="/css/logo.png" alt="AS Cart Services">
+      </a>
+      <span class="admin-pill">Admin Panel</span>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main class="admin-wrapper">
+    <div class="container">
+
+      <!-- ========== TABS ========== -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+        <button class="tab-btn" data-tab="product-performance">Product Performance</button>
+        <button class="tab-btn" data-tab="orders">Orders</button>
+        <button class="tab-btn" data-tab="products">Product Management</button>
+        <button class="tab-btn" data-tab="categories">Categories</button>
+      </div>
+
+      <!-- ========== DASHBOARD TAB ========== -->
+      <section class="tab-content active" id="tab-dashboard">
+        <div class="period-filter">
+          <select id="periodSelect">
+            <option value="today">Today</option>
+            <option value="week" selected>This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+          </select>
+        </div>
+
+        <div class="stats-cards" id="statsCards"></div>
+
+        <div class="chart-container">
+          <canvas id="revenueTrendChart" height="100"></canvas>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-container">
+            <canvas id="categoryChart"></canvas>
+          </div>
+          <div class="chart-container">
+            <canvas id="ordersStatusChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <h3>Inventory Alerts</h3>
+          <div id="lowStockList"></div>
+          <div id="outOfStockList"></div>
+        </div>
+      </section>
+
+      <!-- ========== PRODUCT PERFORMANCE TAB ========== -->
+      <section class="tab-content" id="tab-product-performance">
+        <div class="admin-header">
+          <h2 class="admin-title">Product Performance</h2>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="topSellersChart" height="100"></canvas>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-container">
+            <h3>Top 10 Best‑Selling</h3>
+            <div class="product-list-table" id="topSellingTable"></div>
+          </div>
+          <div class="chart-container">
+            <h3>Worst‑Selling</h3>
+            <div class="product-list-table" id="worstSellingTable"></div>
+          </div>
+        </div>
+
+        <div class="chart-row">
+          <div class="chart-container">
+            <h3>Out of Stock</h3>
+            <div id="outOfStockListPerf"></div>
+          </div>
+          <div class="chart-container">
+            <h3>Low Stock (≤5)</h3>
+            <div id="lowStockListPerf"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== ORDERS TAB ========== -->
+      <section class="tab-content" id="tab-orders">
+        <div class="admin-header">
+          <h2 class="admin-title">Order Management</h2>
+        </div>
+
+        <div class="form-group">
+          <label for="orderStatusFilter">Filter by Status</label>
+          <select id="orderStatusFilter">
+            <option value="">All Orders</option>
+            <option value="PENDING">Pending</option>
+            <option value="PROCESSING">Processing</option>
+            <option value="SHIPPED">Shipped</option>
+            <option value="DELIVERED">Delivered</option>
+            <option value="CANCELLED">Cancelled</option>
+          </select>
+        </div>
+
+        <div id="ordersTableContainer">
+          <p class="loading-spinner">Loading orders…</p>
+        </div>
+      </section>
+
+
+      <!-------Categories Management Tab--------->
+      <section class="tab-content" id="tab-categories">
+        <div class="admin-header">
+          <h2 class="admin-title">Manage Categories</h2>
+        </div>
+
+        <div class="form-card">
+          <form id="categoryForm">
+            <div class="form-group">
+              <label for="categoryName">Category Name *</label>
+              <input type="text" id="categoryName" required>
+            </div>
+            <div class="form-group">
+              <label for="categoryDescription">Description</label>
+              <textarea id="categoryDescription" rows="2"></textarea>
+            </div>
+            <input type="hidden" id="categoryEditId">
+            <button type="submit" class="btn-primary" id="categorySubmitBtn">Add Category</button>
+            <button type="button" class="btn-sm btn-cancel" id="categoryCancelBtn" style="display:none;">Cancel</button>
+          </form>
+        </div>
+
+        <div>
+          <h3>Existing Categories</h3>
+          <div id="categoriesTableContainer">
+            <p class="loading-spinner">Loading categories…</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== PRODUCT MANAGEMENT TAB ========== -->
+      <section class="tab-content" id="tab-products">
+        <div class="admin-header">
+          <h1 class="admin-title" id="formHeading">Add New Product</h1>
+        </div>
+
+        <div class="form-card">
+          <form id="productForm">
+            <div class="form-group">
+              <label for="name">Product Name</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+              <label for="description">Description</label>
+              <textarea id="description" name="description" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+              <label for="price">Price (DA)</label>
+              <input type="number" id="price" name="price" step="0.01" required>
+            </div>
+            <div class="form-group">
+              <label for="stock">Stock</label>
+              <input type="number" id="stock" name="stock" required>
+            </div>
+            <div class="form-group">
+              <label for="categoryId">Category</label>
+              <select id="categoryId" name="categoryId" required>
+                <option value="">Select category</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="imageFile">Product Image</label>
+              <input type="file" id="imageFile" name="imageFile" accept="image/*">
+              <img id="imagePreview" class="image-preview" style="display:none;" alt="Preview">
+            </div>
+            <button type="submit" class="btn-primary" id="submitBtn">Add Product</button>
+            <button type="button" class="btn-sm btn-cancel" id="cancelBtn" style="display:none;">Cancel</button>
+          </form>
+        </div>
+        <section>
+        <h2>Existing Products</h2>
+        <div id="productTableContainer">
+          <p class="loading-spinner">Loading products…</p>
+        </div>
+      </section>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <p>&copy; 2026 Adult Clothing Store. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- NO duplicate script tag here – admin.js is already loaded in <head> with defer -->
+</body>
+
+</html>

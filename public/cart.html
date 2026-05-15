@@ -1,0 +1,142 @@
+<!-- File Path: /public/cart.html -->
+<!-- Purpose: Shopping cart page -->
+<!-- Linked Files: css/style.css, js/cart.js -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Cart – Adult Clothing Store</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=sn-pro@400,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/cart.js" defer></script>
+  <script src="/js/auth.js" defer></script>
+  <script src="/js/header.js" defer></script>
+  <script defer>
+    async function loadCart() {
+      const cart = getCart();
+      const container = document.getElementById('cartItems');
+      if (cart.length === 0) {
+        container.innerHTML = '<p>Your cart is empty.</p>';
+        document.getElementById('checkoutBtn').style.display = 'none';
+        return;
+      }
+
+      // Fetch all product details for items in cart
+      const productIds = cart.map(item => item.productId);
+      const res = await fetch('/api/products'); // get all product list, then filter (inefficient but simple) – alternatively use a batch endpoint
+      const allProducts = await res.json();
+      const productMap = {};
+      allProducts.forEach(p => { productMap[p.id] = p; });
+
+      let html = '<div class="cart-items">';
+      let total = 0;
+      cart.forEach(item => {
+        const product = productMap[item.productId];
+        if (!product) return; // product may have been deleted
+        const lineTotal = product.price * item.quantity;
+        total += lineTotal;
+        const image = (product.images && product.images.length > 0) ? product.images[0] : 'https://via.placeholder.com/80';
+        html += `
+          <div class="cart-item" data-product-id="${item.productId}">
+            <img src="${image}" alt="${product.name}" class="cart-item__image">
+            <div class="cart-item__details">
+              <h3>${product.name}</h3>
+              <p>DA ${parseFloat(product.price).toFixed(2)}</p>
+            </div>
+            <div class="cart-item__quantity">
+              <button class="qty-btn" data-action="decrease">-</button>
+              <input type="number" value="${item.quantity}" min="1" max="${product.stock}" class="qty-input" data-product-id="${item.productId}">
+              <button class="qty-btn" data-action="increase">+</button>
+            </div>
+            <div class="cart-item__total">DA ${lineTotal.toFixed(2)}</div>
+            <button class="btn-remove" data-product-id="${item.productId}">Remove</button>
+          </div>
+        `;
+      });
+      html += '</div>';
+      html += `<div class="cart-summary">
+        <p>Total: <strong>DA ${total.toFixed(2)}</strong></p>
+        <a href="/checkout.html" class="btn-primary" id="checkoutBtn">Proceed to Checkout</a>
+      </div>`;
+      container.innerHTML = html;
+
+      // Attach event listeners
+      document.querySelectorAll('.qty-input').forEach(input => {
+        input.addEventListener('change', (e) => {
+          const productId = e.target.dataset.productId;
+          const newQty = parseInt(e.target.value);
+          if (isNaN(newQty) || newQty < 1) {
+            e.target.value = 1;
+            updateCartQuantity(productId, 1);
+          } else {
+            updateCartQuantity(productId, newQty);
+          }
+          loadCart(); // refresh display
+          updateCartCount();
+        });
+      });
+
+      document.querySelectorAll('.qty-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const parent = e.target.closest('.cart-item');
+          const input = parent.querySelector('.qty-input');
+          const productId = input.dataset.productId;
+          let qty = parseInt(input.value);
+          if (btn.dataset.action === 'increase') qty++;
+          else if (btn.dataset.action === 'decrease') qty--;
+          if (qty < 1) {
+            removeFromCart(productId);
+          } else {
+            updateCartQuantity(productId, qty);
+          }
+          loadCart();
+          updateCartCount();
+        });
+      });
+
+      document.querySelectorAll('.btn-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const productId = e.target.dataset.productId;
+          removeFromCart(productId);
+          loadCart();
+          updateCartCount();
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadCart);
+  </script>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="container header-container">
+      <a href="/" class="logo" aria-label="AS Cart Services home">
+        <img src="/css/logo.png" alt="AS Cart Services">
+      </a>
+      <nav class="simple-nav">
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/login.html">Login</a></li>
+          <li><a href="/cart.html">Cart <span id="cartCount">0</span></a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container page-main">
+    <h1>Your Cart</h1>
+    <div id="cartItems"></div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-container">
+      <p>&copy; 2026 Adult Clothing Store. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+
+</html>
