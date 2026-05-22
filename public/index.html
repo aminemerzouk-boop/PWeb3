@@ -4,6 +4,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,6 +16,7 @@
   <script src="/js/header.js" defer></script>
   <script src="/js/main.js" defer></script>
 </head>
+
 <body>
   <!-- ========== STICKY HEADER ========== -->
   <header class="site-header" id="siteHeader">
@@ -26,11 +28,13 @@
 
       <!-- Search & Filter tools (now inside the header) -->
       <div class="header-tools">
-        <input type="text" id="searchInput" placeholder="Search products...">
-        <select id="categoryFilter">
-          <option value="">All Categories</option>
-          <!-- populated by JS -->
-        </select>
+        <div class="search-filter-wrapper">
+          <input type="text" id="searchInput" placeholder="Search products...">
+          <select id="categoryFilter">
+            <option value="">All Categories</option>
+            <!-- populated by JS -->
+          </select>
+        </div>
       </div>
 
       <!-- Hamburger button (mobile only) -->
@@ -76,9 +80,10 @@
     <div class="container footer-container">
       <div class="footer-contact">
         <h3>Contact Us</h3>
-        <p>Email: <a href="mailto:merzoukamine47@gmail.com">merzoukamine47@gmail.com</a>, <a href="mailto:samoumegharba210@gmail.com">samoumegharba210@gmail.com</a></p>
+        <p>Email: <a href="mailto:merzoukamine47@gmail.com">merzoukamine47@gmail.com</a>, <a
+            href="mailto:samoumegharba210@gmail.com">samoumegharba210@gmail.com</a></p>
         <p>Phone: <a href="tel:+2135558055580">0558 05 55 80</a>, <a href="tel:+213770222478">0770 22 24 78</a></p>
-        
+
       </div>
       <div class="footer-links">
         <p><a href="/terms.html">Terms of Service</a></p>
@@ -87,4 +92,5 @@
     </div>
   </footer>
 </body>
+
 </html>

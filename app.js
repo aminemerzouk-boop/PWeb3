@@ -1,6 +1,6 @@
 // File Path: /app.js
 // Purpose: Express server, static files, API routes, protected admin
-// Linked Files: many routes, middleware/auth.js, middleware/authAdmin.js
+// Linked Files: routes, middleware/auth.js, middleware/authAdmin.js
 
 require('dotenv').config();
 const express = require('express');
