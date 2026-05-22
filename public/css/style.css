@@ -424,6 +424,7 @@ input[type="file"]::file-selector-button {
   font-weight: 700;
 }
 
+/* Hide error message container when it has no text or only whitespace */
 .error-message {
   margin-bottom: var(--space-4) !important;
   padding: var(--space-3) var(--space-4);
@@ -431,6 +432,15 @@ input[type="file"]::file-selector-button {
   background: var(--error-bg);
   border: 1px solid rgba(159, 36, 26, 0.25);
   border-radius: var(--radius);
+}
+
+.error-message:empty {
+  display: none;
+}
+
+/* Also hide if it only contains whitespace */
+.error-message:blank {
+  display: none;
 }
 
 .hidden {
